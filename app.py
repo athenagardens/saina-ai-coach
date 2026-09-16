@@ -1,7 +1,10 @@
 import streamlit as st
 import openai
 import pandas as pd
+import streamlit as st
 
+# Loads logo.png directly from your main repository folder
+st.image("logo.png", width=150)
 # Load inventory
 df = pd.read_csv("saina_products.csv")
 
