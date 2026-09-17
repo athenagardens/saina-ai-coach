@@ -13,14 +13,14 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 
-# 1. DISPLAY LOGO IN STREAMLIT UI
-try:
-    st.image("saina logo 2025.jpg", width=160)
-except Exception:
+# 1. DISPLAY LOGO IN STREAMLIT UI (COMPACT & UN-SQUASHED)
+if os.path.exists("saina logo 2025.jpg"):
+    st.image("logo.png", width=120)
+else:
     st.write("🌿 **Saina Essential**")
 
 # 2. APP HEADER
-st.title("🌿Saina Essential AI Health Coach")
+st.title("Saina Essential AI Health Coach")
 st.write("Tell us how you're feeling, and we'll craft your custom wellness routine.")
 
 # 3. LOAD INVENTORY
@@ -135,29 +135,34 @@ if "ai_json_output" in st.session_state:
         
         st.code(invoice_summary, language="markdown")
         
-        # 7. GENERATE PDF INVOICE WITH LOGO IN MEMORY
+        # 7. GENERATE PDF INVOICE IN MEMORY (SHADES OF GREEN DESIGN)
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=36, leftMargin=36, topMargin=36, bottomMargin=36)
         styles = getSampleStyleSheet()
         
         story = []
         
-        # Embed Logo dynamically if available in repository
+        # Perfectly scaled logo without stretching/squashing
         if os.path.exists("saina logo 2025.jpg"):
-            logo_img = RLImage("saina logo 2025.jpg", width=120, height=50)
+            logo_img = RLImage("saina logo 2025.jpg", width=90, height=50, kind='proportional')
             logo_img.hAlign = 'LEFT'
             story.append(logo_img)
-            story.append(Spacer(1, 10))
+            story.append(Spacer(1, 8))
             
-        title_style = ParagraphStyle('TitleStyle', parent=styles['Heading1'], fontSize=16, textColor=colors.HexColor("#2E7D32"))
+        # Green Palette Definition
+        forest_green = colors.HexColor("#1B4D3E")
+        sage_green = colors.HexColor("#4A7C59")
+        mint_bg = colors.HexColor("#E8F5E9")
+        
+        title_style = ParagraphStyle('TitleStyle', parent=styles['Heading1'], fontSize=16, textColor=forest_green)
         story.append(Paragraph("OFFICIAL INVOICE", title_style))
-        story.append(Spacer(1, 10))
+        story.append(Spacer(1, 8))
         
         meta_text = f"<b>Invoice #:</b> {invoice_num}<br/><b>Date:</b> {today_date}<br/><b>Status:</b> Awaiting Payment (POP)"
         story.append(Paragraph(meta_text, styles['Normal']))
-        story.append(Spacer(1, 15))
+        story.append(Spacer(1, 12))
         
-        # Table data
+        # Table data formatted with green theme
         table_data = [["Item Description", "Price (BWP)"]]
         for name, p in selected_items:
             table_data.append([name, f"P{p:.2f}"])
@@ -166,18 +171,26 @@ if "ai_json_output" in st.session_state:
         
         t = Table(table_data, colWidths=[350, 150])
         t.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#2E7D32")),
+            ('BACKGROUND', (0, 0), (-1, 0), forest_green),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-            ('BACKGROUND', (0, -1), (-1, -1), colors.HexColor("#E8F5E9")),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 6),
+            ('BACKGROUND', (0, -1), (-1, -1), mint_bg),
+            ('TEXTCOLOR', (0, -1), (-1, -1), forest_green),
             ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('GRID', (0, 0), (-1, -1), 0.5, sage_green),
         ]))
         story.append(t)
-        story.append(Spacer(1, 20))
+        story.append(Spacer(1, 16))
         
-        bank_text = "<b>BANKING DETAILS FOR TRANSFER:</b><br/>Bank: First National Bank (FNB)<br/>Account Name: Saina Essential<br/>Account Number: [Your Account Number]<br/>Branch Code: [Branch Code]<br/><b>Reference: " + invoice_num + "</b>"
+        bank_text = (
+            "<font color='#1B4D3E'><b>BANKING DETAILS FOR TRANSFER:</b></font><br/>"
+            "Bank: First National Bank (FNB)<br/>"
+            "Account Name: Saina Essential<br/>"
+            "Account Number: [Your Account Number]<br/>"
+            "Branch Code: [Branch Code]<br/>"
+            "<b>Reference: " + invoice_num + "</b>"
+        )
         story.append(Paragraph(bank_text, styles['Normal']))
         
         doc.build(story)
@@ -191,8 +204,8 @@ if "ai_json_output" in st.session_state:
             mime="application/pdf"
         )
         
-        # 8. WHATSAPP CHECKOUT BUTTON
-        phone_number = "26771334355"
+        # 8. WHATSAPP CHECKOUT BUTTON (PHONE NUMBER PRESERVED)
+        phone_number = "26774501880"
         
         whatsapp_msg = (
             f"Hello Saina Essential! I generated Invoice #{invoice_num} for my order:\n\n"
