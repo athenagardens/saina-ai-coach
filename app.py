@@ -57,7 +57,7 @@ if st.button("Generate My Routine"):
             st.write(routine_text)
             
             # 5. WHATSAPP CHECKOUT BUTTON WITH BRANDED INTERACTIVE TEMPLATE
-            phone_number = "26774501880"
+            phone_number = "26771334355"
             
             message = (
                 f"🌿 *SAINA ESSENTIAL — ORDER SELECTION* 🌿\n\n"
