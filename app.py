@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import urllib.parse
-import requests
+from groq import Groq
 
 # 1. DISPLAY LOGO
 try:
@@ -21,6 +21,9 @@ user_symptoms = st.text_input("How can we help you today?", placeholder="e.g., I
 
 if st.button("Generate My Routine"):
     if user_symptoms:
+        # Initialize Groq Client using your secret key
+        client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+        
         context = f"Saina Inventory Products and Prices:\n{df.to_string()}\n\nUser Issue: {user_symptoms}"
         
         system_instructions = (
@@ -31,24 +34,16 @@ if st.button("Generate My Routine"):
             "Click the button below to send this quote to WhatsApp and receive payment details."
         )
         
-        # DIRECT API CALL TO GITHUB MODELS (BYPASSES OPENAI SDK CONNECTION ISSUES)
-        url = "https://models.inference.ai.azure.com/chat/completions"
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {st.secrets['GITHUB_TOKEN']}"
-        }
-        payload = {
-            "model": "gpt-4o-mini",
-            "messages": [
-                {"role": "system", "content": system_instructions},
-                {"role": "user", "content": context}
-            ]
-        }
-        
         try:
-            res = requests.post(url, headers=headers, json=payload)
-            res_data = res.json()
-            routine_text = res_data["choices"][0]["message"]["content"]
+            completion = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": system_instructions},
+                    {"role": "user", "content": context}
+                ]
+            )
+            
+            routine_text = completion.choices[0].message.content
             
             st.success("Your Personalized Saina Routine & Quote:")
             st.write(routine_text)
@@ -67,4 +62,4 @@ if st.button("Generate My Routine"):
                 unsafe_allow_html=True
             )
         except Exception as e:
-            st.error(f"Could not connect to AI service. Details: {e}")
+            st.error(f"Error connecting to AI service: {e}")
