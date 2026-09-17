@@ -11,7 +11,7 @@ except Exception:
     st.write("🌿 **Saina Essential**")  # Fallback text if logo.png is not found yet
 
 # --- 2. APP HEADER ---
-st.title("Saina Essential AI Health Coach")
+st.title("🌿Saina Essential AI Health Coach")
 st.write("Tell us how you're feeling, and we'll craft your custom wellness routine.")
 
 # --- 3. LOAD INVENTORY ---
