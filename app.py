@@ -13,10 +13,9 @@ except Exception:
 st.title("Saina Essential AI Health Coach")
 st.write("Tell us how you're feeling, and we'll craft your custom wellness routine.")
 
-# 3. LOAD INVENTORY & OPTIMIZE DATA
+# 3. LOAD INVENTORY & OPTIMIZE CATALOG
 df = pd.read_csv("saina_products.csv")
 
-# Extract compact catalog text to stay within Groq rate limits
 catalog_summary = ""
 for _, row in df.iterrows():
     catalog_summary += f"- {row['Product Name']} ({row['Category']}): P{row['Price (BWP)']}. Uses: {row['Primary Uses']}\n"
@@ -40,13 +39,14 @@ if st.button("Generate My Routine"):
         user_prompt = f"Catalog:\n{catalog_summary}\n\nCustomer Symptoms: {user_symptoms}"
         
         try:
+            # Active production model on Groq's API
             completion = client.chat.completions.create(
-                model="llama-3.1-8b-instant",
+                model="openai/gpt-oss-20b",
                 messages=[
                     {"role": "system", "content": system_instructions},
                     {"role": "user", "content": user_prompt}
                 ],
-                max_tokens=400  # Cap response size to prevent context overflow
+                max_tokens=400
             )
             
             routine_text = completion.choices[0].message.content
