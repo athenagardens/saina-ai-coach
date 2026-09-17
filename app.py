@@ -28,13 +28,13 @@ if st.button("Generate My Routine"):
         # Build prompt context
         context = f"Saina Inventory Products:\n{df.to_string()}\n\nUser Issue: {user_symptoms}"
         
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": "You are Saina's AI Herbalist. Prescribe a custom routine using ONLY Saina inventory."},
-                {"role": "user", "content": context}
-            ]
-        )
+        system_instructions = (
+    "You are Saina's AI Herbalist. Recommend products strictly from the provided inventory. "
+    "Format your output as a clear QUOTE with this exact layout:\n\n"
+    "📋 RECOMMENDED ROUTINE:\n- [Item 1]: [Instructions] (P[Price])\n- [Item 2]: [Instructions] (P[Price])\n\n"
+    "💰 ORDER QUOTE TOTAL: P[Sum]\n\n"
+    "Click the button below to send this quote to WhatsApp and receive payment details."
+)
         
         routine_text = response.choices[0].message.content
         
