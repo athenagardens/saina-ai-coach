@@ -1,7 +1,7 @@
 import streamlit as st
-import openai
 import pandas as pd
 import urllib.parse
+import requests
 
 # 1. DISPLAY LOGO
 try:
@@ -10,7 +10,7 @@ except Exception:
     st.write("🌿 **Saina Essential**")
 
 # 2. APP HEADER
-st.title("🌿 Saina Essential AI Health Coach")
+st.title("🌿Saina Essential AI Health Coach")
 st.write("Tell us how you're feeling, and we'll craft your custom wellness routine.")
 
 # 3. LOAD INVENTORY
@@ -21,12 +21,6 @@ user_symptoms = st.text_input("How can we help you today?", placeholder="e.g., I
 
 if st.button("Generate My Routine"):
     if user_symptoms:
-        # Connect to GitHub Copilot's Free Model Endpoint
-        client = openai.OpenAI(
-            base_url="https://models.inference.ai.azure.com",
-            api_key=st.secrets["GITHUB_TOKEN"],
-        )
-        
         context = f"Saina Inventory Products and Prices:\n{df.to_string()}\n\nUser Issue: {user_symptoms}"
         
         system_instructions = (
@@ -37,29 +31,40 @@ if st.button("Generate My Routine"):
             "Click the button below to send this quote to WhatsApp and receive payment details."
         )
         
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
+        # DIRECT API CALL TO GITHUB MODELS (BYPASSES OPENAI SDK CONNECTION ISSUES)
+        url = "https://models.inference.ai.azure.com/chat/completions"
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {st.secrets['GITHUB_TOKEN']}"
+        }
+        payload = {
+            "model": "gpt-4o-mini",
+            "messages": [
                 {"role": "system", "content": system_instructions},
                 {"role": "user", "content": context}
             ]
-        )
+        }
         
-        routine_text = response.choices[0].message.content
-        
-        st.success("Your Personalized Saina Routine & Quote:")
-        st.write(routine_text)
-        
-        # 5. WHATSAPP CHECKOUT BUTTON
-        phone_number = "26771334355"
-        
-        message = f"Hello Saina Essential! I used your AI Coach and would like to place an order:\n\n{routine_text}"
-        encoded_message = urllib.parse.quote(message)
-        whatsapp_url = f"https://wa.me/{phone_number}?text={encoded_message}"
-        
-        st.markdown(
-            f'<a href="{whatsapp_url}" target="_blank">'
-            f'<button style="background-color:#25D366; color:white; border:none; padding:12px 24px; border-radius:6px; cursor:pointer; font-size:16px; font-weight:bold;">📲 Send Order & Total to WhatsApp</button>'
-            f'</a>', 
-            unsafe_allow_html=True
-        )
+        try:
+            res = requests.post(url, headers=headers, json=payload)
+            res_data = res.json()
+            routine_text = res_data["choices"][0]["message"]["content"]
+            
+            st.success("Your Personalized Saina Routine & Quote:")
+            st.write(routine_text)
+            
+            # 5. WHATSAPP CHECKOUT BUTTON
+            phone_number = "26774501880"
+            
+            message = f"Hello Saina Essential! I used your AI Coach and would like to place an order:\n\n{routine_text}"
+            encoded_message = urllib.parse.quote(message)
+            whatsapp_url = f"https://wa.me/{phone_number}?text={encoded_message}"
+            
+            st.markdown(
+                f'<a href="{whatsapp_url}" target="_blank">'
+                f'<button style="background-color:#25D366; color:white; border:none; padding:12px 24px; border-radius:6px; cursor:pointer; font-size:16px; font-weight:bold;">📲 Send Order & Total to WhatsApp</button>'
+                f'</a>', 
+                unsafe_allow_html=True
+            )
+        except Exception as e:
+            st.error(f"Could not connect to AI service. Details: {e}")
