@@ -15,7 +15,7 @@ from reportlab.lib import colors
 
 # 1. DISPLAY LOGO IN STREAMLIT UI (COMPACT & UN-SQUASHED)
 if os.path.exists("saina logo 2025.jpg"):
-    st.image("logo.png", width=120)
+    st.image("saina logo 2025.jpg", width=120)
 else:
     st.write("🌿 **Saina Essential**")
 
