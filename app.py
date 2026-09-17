@@ -5,12 +5,12 @@ from groq import Groq
 
 # 1. DISPLAY LOGO
 try:
-    st.image("saina logo 2025.jpg", width=160)
+    st.image("logo.png", width=160)
 except Exception:
     st.write("🌿 **Saina Essential**")
 
 # 2. APP HEADER
-st.title("🌿Saina Essential AI Health Coach")
+st.title("Saina Essential AI Health Coach")
 st.write("Tell us how you're feeling, and we'll craft your custom wellness routine.")
 
 # 3. LOAD INVENTORY
@@ -21,9 +21,16 @@ user_symptoms = st.text_input("How can we help you today?", placeholder="e.g., I
 
 if st.button("Generate My Routine"):
     if user_symptoms:
-        # Initialize Groq Client using your secret key
+        # Initialize Groq Client
         client = Groq(api_key=st.secrets["GROQ_API_KEY"])
         
+        # DYNAMICALLY FIND AN AVAILABLE MODEL
+        try:
+            available_models = [m.id for m in client.models.list().data if "llama" in m.id]
+            selected_model = available_models[0] if available_models else "llama-3.1-8b-instant"
+        except Exception:
+            selected_model = "llama-3.1-8b-instant"
+
         context = f"Saina Inventory Products and Prices:\n{df.to_string()}\n\nUser Issue: {user_symptoms}"
         
         system_instructions = (
@@ -36,7 +43,7 @@ if st.button("Generate My Routine"):
         
         try:
             completion = client.chat.completions.create(
-                model="llama-3.1-8b-instant",
+                model=selected_model,
                 messages=[
                     {"role": "system", "content": system_instructions},
                     {"role": "user", "content": context}
