@@ -1,11 +1,12 @@
 import streamlit as st
 import pandas as pd
 import urllib.parse
+import datetime
 from groq import Groq
 
 # 1. DISPLAY LOGO
 try:
-    st.image("saina logo 2025.jpg", width=160)
+    st.image("logo.png", width=160)
 except Exception:
     st.write("🌿 **Saina Essential**")
 
@@ -52,13 +53,11 @@ if st.button("Generate My Routine"):
         except Exception as e:
             st.error(f"Error connecting to AI service: {e}")
 
-# 5. DYNAMIC ITEM SELECTION & CHECKOUT
+# 5. AUTOMATED ITEM SELECTION & INVOICE GENERATION
 if "raw_ai_output" in st.session_state:
     st.markdown("---")
-    st.subheader("🌿 Customize Your Order")
-    st.write("Uncheck any items you do not wish to purchase right now:")
+    st.subheader("🌿 Customize Your Order & Generate Invoice")
     
-    # Parse items returned by AI
     lines = st.session_state["raw_ai_output"].strip().split("\n")
     selected_items = []
     total_price = 0
@@ -68,29 +67,45 @@ if "raw_ai_output" in st.session_state:
             try:
                 parts = line.split("|")
                 prod_name = parts[0].replace("PRODUCT:", "").strip()
-                price_str = parts[1].replace("PRICE:", "").replace("P", "").strip()
-                price = float(price_str)
+                price = float(parts[1].replace("PRICE:", "").replace("P", "").strip())
                 
-                # Create a Streamlit Checkbox for each product
                 if st.checkbox(f"{prod_name} — P{price:.2f}", value=True, key=prod_name):
-                    selected_items.append(f"• {prod_name} (P{price:.2f})")
+                    selected_items.append((prod_name, price))
                     total_price += price
             except Exception:
                 continue
 
-    st.markdown(f"### 💰 **Confirmed Total: P{total_price:.2f}**")
-    
-    # 6. WHATSAPP BUTTON WITH ONLY CHECKED ITEMS
     if selected_items:
-        items_formatted = "\n".join(selected_items)
-        phone_number = "26771334355"
+        invoice_num = f"SE-{datetime.datetime.now().strftime('%M%S')}"
+        today_date = datetime.date.today().strftime("%B %d, %Y")
+        
+        # DISPLAY DIGITAL INVOICE ON SCREEN
+        st.markdown(f"### 📋 **AUTOMATED INVOICE: #{invoice_num}**")
+        st.write(f"**Date:** {today_date}")
+        
+        invoice_text = f"🌿 **SAINA ESSENTIAL — INVOICE #{invoice_num}**\n\n"
+        items_msg = ""
+        for name, p in selected_items:
+            items_msg += f"• {name} — P{p:.2f}\n"
+            
+        invoice_text += items_msg
+        invoice_text += f"\n💰 **TOTAL DUE: P{total_price:.2f}**\n\n"
+        invoice_text += "🏦 **BANK DETAILS:**\n"
+        invoice_text += "• Bank: FNB / First National Bank\n"
+        invoice_text += "• Account Name: Saina Essential\n"
+        invoice_text += "• Account Number: [Your Acc Number]\n"
+        invoice_text += f"• Reference: {invoice_num}"
+        
+        st.code(invoice_text, language="markdown")
+        
+        # 6. WHATSAPP BUTTON WITH INVOICE DETAILS PRE-FILLED
+        phone_number = "26774501880"
         
         whatsapp_msg = (
-            f"🌿 *SAINA ESSENTIAL — CONFIRMED ORDER* 🌿\n\n"
-            f"Hello! I have selected the following items from my AI consultation:\n\n"
-            f"{items_formatted}\n\n"
-            f"💰 *TOTAL ORDER: P{total_price:.2f}*\n\n"
-            f"Please verify stock and issue an invoice so I can provide Proof of Payment (POP)."
+            f"Hello Saina Essential! I generated Invoice #{invoice_num} for my order:\n\n"
+            f"{items_msg}\n"
+            f"💰 TOTAL: P{total_price:.2f}\n\n"
+            f"Please verify stock so I can transfer funds using Reference: {invoice_num} and submit my Proof of Payment."
         )
         
         encoded_msg = urllib.parse.quote(whatsapp_msg)
@@ -98,9 +113,7 @@ if "raw_ai_output" in st.session_state:
         
         st.markdown(
             f'<a href="{whatsapp_url}" target="_blank">'
-            f'<button style="background-color:#25D366; color:white; border:none; padding:12px 24px; border-radius:6px; cursor:pointer; font-size:16px; font-weight:bold;">📲 Send Confirmed Items to WhatsApp</button>'
+            f'<button style="background-color:#25D366; color:white; border:none; padding:12px 24px; border-radius:6px; cursor:pointer; font-size:16px; font-weight:bold;">📲 Submit Order & Invoice #{invoice_num} to WhatsApp</button>'
             f'</a>', 
             unsafe_allow_html=True
         )
-    else:
-        st.warning("Please check at least one item to proceed to WhatsApp checkout.")
