@@ -121,4 +121,3 @@ if "raw_ai_output" in st.session_state:
         )
     else:
         st.warning("⚠️ No items selected yet. Please tick at least one item above to generate your invoice and WhatsApp checkout button.")
-What Changed:
