@@ -4,17 +4,18 @@ import urllib.parse
 import datetime
 import json
 import io
+import os
 from groq import Groq
 
 # ReportLab imports for automated PDF invoice generation
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image as RLImage
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 
-# 1. DISPLAY LOGO
+# 1. DISPLAY LOGO IN STREAMLIT UI
 try:
-    st.image("saina logo 2025.jpg", width=160)
+    st.image("logo.png", width=160)
 except Exception:
     st.write("🌿 **Saina Essential**")
 
@@ -91,7 +92,6 @@ if "ai_json_output" in st.session_state:
         p_name = item.get("product_name", "Unknown Product")
         p_price = float(item.get("price", 0.0))
         
-        # Checkboxes default to Unticked
         if st.checkbox(f"{p_name} — P{p_price:.2f}", value=False, key=f"rec_{idx}_{p_name}"):
             selected_items.append((p_name, p_price))
             subtotal += p_price
@@ -135,19 +135,27 @@ if "ai_json_output" in st.session_state:
         
         st.code(invoice_summary, language="markdown")
         
-        # 7. GENERATE PDF INVOICE IN MEMORY
+        # 7. GENERATE PDF INVOICE WITH LOGO IN MEMORY
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=36, leftMargin=36, topMargin=36, bottomMargin=36)
         styles = getSampleStyleSheet()
         
         story = []
-        title_style = ParagraphStyle('TitleStyle', parent=styles['Heading1'], fontSize=18, textColor=colors.HexColor("#2E7D32"))
-        story.append(Paragraph("🌿 SAINA ESSENTIAL — OFFICIAL INVOICE", title_style))
-        story.append(Spacer(1, 12))
+        
+        # Embed Logo dynamically if available in repository
+        if os.path.exists("logo.png"):
+            logo_img = RLImage("logo.png", width=120, height=50)
+            logo_img.hAlign = 'LEFT'
+            story.append(logo_img)
+            story.append(Spacer(1, 10))
+            
+        title_style = ParagraphStyle('TitleStyle', parent=styles['Heading1'], fontSize=16, textColor=colors.HexColor("#2E7D32"))
+        story.append(Paragraph("OFFICIAL INVOICE", title_style))
+        story.append(Spacer(1, 10))
         
         meta_text = f"<b>Invoice #:</b> {invoice_num}<br/><b>Date:</b> {today_date}<br/><b>Status:</b> Awaiting Payment (POP)"
         story.append(Paragraph(meta_text, styles['Normal']))
-        story.append(Spacer(1, 18))
+        story.append(Spacer(1, 15))
         
         # Table data
         table_data = [["Item Description", "Price (BWP)"]]
@@ -184,7 +192,7 @@ if "ai_json_output" in st.session_state:
         )
         
         # 8. WHATSAPP CHECKOUT BUTTON
-        phone_number = "26771334355"
+        phone_number = "26774501880"
         
         whatsapp_msg = (
             f"Hello Saina Essential! I generated Invoice #{invoice_num} for my order:\n\n"
