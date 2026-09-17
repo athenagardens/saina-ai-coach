@@ -36,7 +36,7 @@ if st.button("Generate My Routine"):
         
         try:
             completion = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model="llama-3.1-8b-instant",
                 messages=[
                     {"role": "system", "content": system_instructions},
                     {"role": "user", "content": context}
