@@ -56,7 +56,8 @@ if st.button("Generate My Routine"):
 # 5. AUTOMATED ITEM SELECTION & INVOICE GENERATION
 if "raw_ai_output" in st.session_state:
     st.markdown("---")
-    st.subheader("🌿 Customize Your Order & Generate Invoice")
+    st.subheader("🌿 Customize Your Order")
+    st.info("👉 **Please select the items you want to purchase by ticking the boxes below:**")
     
     lines = st.session_state["raw_ai_output"].strip().split("\n")
     selected_items = []
@@ -69,7 +70,8 @@ if "raw_ai_output" in st.session_state:
                 prod_name = parts[0].replace("PRODUCT:", "").strip()
                 price = float(parts[1].replace("PRICE:", "").replace("P", "").strip())
                 
-                if st.checkbox(f"{prod_name} — P{price:.2f}", value=True, key=prod_name):
+                # Checkboxes now default to Unticked (value=False)
+                if st.checkbox(f"{prod_name} — P{price:.2f}", value=False, key=prod_name):
                     selected_items.append((prod_name, price))
                     total_price += price
             except Exception:
@@ -102,7 +104,7 @@ if "raw_ai_output" in st.session_state:
         phone_number = "26771334355"
         
         whatsapp_msg = (
-            f"Hello Saina Essential! I generated Invoice #{invoice_num} for my order:\n\n"
+            f"Hello Saina Essential! I generated Invoice #{invoice_num} for my selected order:\n\n"
             f"{items_msg}\n"
             f"💰 TOTAL: P{total_price:.2f}\n\n"
             f"Please verify stock so I can transfer funds using Reference: {invoice_num} and submit my Proof of Payment."
@@ -117,3 +119,6 @@ if "raw_ai_output" in st.session_state:
             f'</a>', 
             unsafe_allow_html=True
         )
+    else:
+        st.warning("⚠️ No items selected yet. Please tick at least one item above to generate your invoice and WhatsApp checkout button.")
+What Changed:
