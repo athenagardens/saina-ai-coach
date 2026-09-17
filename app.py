@@ -15,12 +15,12 @@ from reportlab.lib import colors
 
 # 1. DISPLAY LOGO IN STREAMLIT UI
 try:
-    st.image("logo.png", width=160)
+    st.image("saina logo 2025.jpg", width=160)
 except Exception:
     st.write("🌿 **Saina Essential**")
 
 # 2. APP HEADER
-st.title("Saina Essential AI Health Coach")
+st.title("🌿Saina Essential AI Health Coach")
 st.write("Tell us how you're feeling, and we'll craft your custom wellness routine.")
 
 # 3. LOAD INVENTORY
@@ -143,8 +143,8 @@ if "ai_json_output" in st.session_state:
         story = []
         
         # Embed Logo dynamically if available in repository
-        if os.path.exists("logo.png"):
-            logo_img = RLImage("logo.png", width=120, height=50)
+        if os.path.exists("saina logo 2025.jpg"):
+            logo_img = RLImage("saina logo 2025.jpg", width=120, height=50)
             logo_img.hAlign = 'LEFT'
             story.append(logo_img)
             story.append(Spacer(1, 10))
@@ -192,7 +192,7 @@ if "ai_json_output" in st.session_state:
         )
         
         # 8. WHATSAPP CHECKOUT BUTTON
-        phone_number = "26774501880"
+        phone_number = "26771334355"
         
         whatsapp_msg = (
             f"Hello Saina Essential! I generated Invoice #{invoice_num} for my order:\n\n"
