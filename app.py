@@ -5,7 +5,7 @@ import urllib.parse
 
 # 1. DISPLAY LOGO
 try:
-    st.image("logo.png", width=160)
+    st.image("saina logo 2025.jpg", width=160)
 except Exception:
     st.write("🌿 **Saina Essential**")
 
