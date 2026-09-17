@@ -13,8 +13,13 @@ except Exception:
 st.title("Saina Essential AI Health Coach")
 st.write("Tell us how you're feeling, and we'll craft your custom wellness routine.")
 
-# 3. LOAD INVENTORY
+# 3. LOAD INVENTORY & OPTIMIZE DATA
 df = pd.read_csv("saina_products.csv")
+
+# Extract compact catalog text to stay within Groq rate limits
+catalog_summary = ""
+for _, row in df.iterrows():
+    catalog_summary += f"- {row['Product Name']} ({row['Category']}): P{row['Price (BWP)']}. Uses: {row['Primary Uses']}\n"
 
 # 4. USER INPUT & AI GENERATION
 user_symptoms = st.text_input("How can we help you today?", placeholder="e.g., I have a headache and feel stressed")
@@ -24,30 +29,24 @@ if st.button("Generate My Routine"):
         # Initialize Groq Client
         client = Groq(api_key=st.secrets["GROQ_API_KEY"])
         
-        # DYNAMICALLY FIND AN AVAILABLE MODEL
-        try:
-            available_models = [m.id for m in client.models.list().data if "llama" in m.id]
-            selected_model = available_models[0] if available_models else "llama-3.1-8b-instant"
-        except Exception:
-            selected_model = "llama-3.1-8b-instant"
-
-        context = f"Saina Inventory Products and Prices:\n{df.to_string()}\n\nUser Issue: {user_symptoms}"
-        
         system_instructions = (
-            "You are Saina's AI Herbalist. Recommend products strictly from the provided inventory. "
-            "Format your output as a clear QUOTE with this exact layout:\n\n"
-            "📋 RECOMMENDED ROUTINE:\n- [Item 1]: [Instructions] (P[Price])\n- [Item 2]: [Instructions] (P[Price])\n\n"
+            "You are Saina's AI Herbalist. Recommend products strictly from the provided inventory list. "
+            "Keep recommendations concise. Format your output strictly as a clear QUOTE:\n\n"
+            "📋 RECOMMENDED ROUTINE:\n- [Item Name]: [Brief usage] (P[Price])\n- [Item Name]: [Brief usage] (P[Price])\n\n"
             "💰 ORDER QUOTE TOTAL: P[Sum]\n\n"
             "Click the button below to send this quote to WhatsApp and receive payment details."
         )
         
+        user_prompt = f"Catalog:\n{catalog_summary}\n\nCustomer Symptoms: {user_symptoms}"
+        
         try:
             completion = client.chat.completions.create(
-                model=selected_model,
+                model="llama-3.1-8b-instant",
                 messages=[
                     {"role": "system", "content": system_instructions},
-                    {"role": "user", "content": context}
-                ]
+                    {"role": "user", "content": user_prompt}
+                ],
+                max_tokens=400  # Cap response size to prevent context overflow
             )
             
             routine_text = completion.choices[0].message.content
