@@ -6,7 +6,7 @@ from groq import Groq
 
 # 1. DISPLAY LOGO
 try:
-    st.image("logo.png", width=160)
+    st.image("saina logo 2025.jpg", width=160)
 except Exception:
     st.write("🌿 **Saina Essential**")
 
@@ -99,7 +99,7 @@ if "raw_ai_output" in st.session_state:
         st.code(invoice_text, language="markdown")
         
         # 6. WHATSAPP BUTTON WITH INVOICE DETAILS PRE-FILLED
-        phone_number = "26774501880"
+        phone_number = "26771334355"
         
         whatsapp_msg = (
             f"Hello Saina Essential! I generated Invoice #{invoice_num} for my order:\n\n"
